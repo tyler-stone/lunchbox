@@ -1,0 +1,15 @@
+{
+  "name": "lunchbox",
+  "version": "1.0.0",
+  "description": "Copy static files to a given destination via FTP",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "Tyler Stone",
+  "license": "ISC",
+  "dependencies": {
+    "rimraf": "^2.6.2",
+    "simple-git": "^1.96.0"
+  }
+}

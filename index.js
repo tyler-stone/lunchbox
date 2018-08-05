@@ -11,11 +11,13 @@ const settings = require('./config.json');
 const git =  require('simple-git/promise');
 const fs = require('fs');
 const rimraf = require('rimraf');
-const { execSync } = require('child_process');
+const { exec } = require('child_process');
+const ftp = require('ftp-client');
+
+const CLONE_DIR = './clone'
 
 async function connectAndCloneRepo() {
-	const CLONE_DIR = './clone';
-	const CLONE_REPO = `https://${settings.user}:${settings.password}@${settings.repo}`;
+	const CLONE_REPO = `https://${settings.git_user}:${settings.git_password}@${settings.git_repo}`;
 
 	if (!fs.existsSync(CLONE_DIR)) {
 		console.log("No clone directory. Creating one.");
@@ -28,22 +30,47 @@ async function connectAndCloneRepo() {
 
 	console.log("Cloning repository...");
 	await git().silent(true)
-		.clone(CLONE_REPO, './clone')
+		.clone(CLONE_REPO, CLONE_DIR)
 		.then(() => console.log("Clone complete."))
 		.catch((err) => console.log("Clone failed: ", err));
 
 }
 
-function loadSnack() {
+async function loadSnack() {
 	const snack = require(`./snacks/${settings.snack}`);
 	console.log("Loaded snack:", snack.name);
 	
 	console.log("Running snack pre-build script.");
-	scriptResult = execSync(snack.prebuild, {stdio:[0,1,2]})
+	const prebuild = exec(snack.prebuild, {stdio:[0,1,2]})
 	
 	console.log("Running build script now.");
-	buildResult = execSync(snack.build, {stdio:[0,1,2], cwd:'./clone/'})
+	const build =  exec(snack.build, {stdio:[0,1,2], cwd: CLONE_DIR})
 
+	const result = [await prebuild, await build]
 }
 
-connectAndCloneRepo().then(loadSnack);
+async function connectFtp() {
+	const ftpConfig = {
+		host: settings.ftp_host,
+		port: 21,
+		user: settings.ftp_user,
+		password: settings.ftp_password
+	};
+	const options = {
+		logging: 'basic'
+	};
+	
+	client = new ftp(ftpConfig, options);
+
+	client.connect(function() {
+		client.upload([`${CLONE_DIR}/${settings.build_dir}/**`], settings.ftp_destination_dir, {
+			overwrite: 'older',
+			baseDir: `${CLONE_DIR}/${settings.build_dir}`
+		}, function(result) {
+			console.log(result);
+		});
+	});
+	
+}
+
+connectAndCloneRepo().then(loadSnack).then(connectFtp);

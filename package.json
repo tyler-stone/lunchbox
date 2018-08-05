@@ -9,6 +9,7 @@
   "author": "Tyler Stone",
   "license": "ISC",
   "dependencies": {
+    "ftp-client": "^0.2.2",
     "rimraf": "^2.6.2",
     "simple-git": "^1.96.0"
   }

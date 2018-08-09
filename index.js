@@ -62,7 +62,9 @@ async function connectFtp() {
 	
 	client = new ftp(ftpConfig, options);
 
+	console.log("Connecting to ftp host...");
 	client.connect(function() {
+		console.log("Connected. Uploading...");
 		client.upload([`${CLONE_DIR}/${settings.build_dir}/**`], settings.ftp_destination_dir, {
 			overwrite: 'older',
 			baseDir: `${CLONE_DIR}/${settings.build_dir}`

@@ -1,7 +1,7 @@
 {
   "name": "lunchbox",
   "version": "1.0.0",
-  "description": "Copy static files to a given destination via FTP",
+  "description": "Clona a repository, build with a given set of build instructions, and deplopy build to a given destination via FTP",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
